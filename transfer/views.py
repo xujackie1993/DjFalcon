@@ -17,7 +17,7 @@ class ItemDataReportView(APIView):
         base_dir = os.path.join(settings.BASE_DIR, 'rrddatas')
         rrd_dir = os.path.join(base_dir, hostname)
         if not os.path.isdir(rrd_dir):
-            os.mkdir(rrd_dir)
+            os.makedirs(rrd_dir)
         for k, v in data['items'].items():
             rrd_name = k + '.rrd'
             rrd_init_or_update(rrd_name, v['value'], v['step'], v['counterType'], rrd_dir)

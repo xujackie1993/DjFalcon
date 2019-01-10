@@ -27,7 +27,7 @@ SECRET_KEY = '2n82h-!787tld@i2@b5-w9o6pnf^5w+)k61dfdub#mjl60ae(&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'DjFalcon.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test',
+        'NAME': 'test-django',
         'USER': 'root',
         'PASSWORD': 'root',
         'HOST': '39.106.220.85',

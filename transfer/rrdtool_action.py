@@ -15,12 +15,21 @@ def rrd_init_or_update(rrd_name, value, step, counter_type, rrd_dir):
         rrd_update(rrd_path, value)
 
 
-def rrd_init(rrdname, step, counter_type):
+def rrd_init(rrd_name, step, counter_type):
     """
     聚合时间根据自己需要
     """
     cur_time = str(int(time.time()))
-    rrd = rrdtool.create(rrdname, '--step', '%s' % step, '--start', cur_time,
+
+    # RRA定义格式为[RRA:CF:xff:steps:rows]，CF定义了AVERAGE、MAX、MIN三种数据合并方式
+    # xff定义为0.5，表示一个CDP中的PDP值如超过一半值为UNKNOWN，则该CDP的值就被标为UNKNOWN
+    # 下列前4个RRA的定义说明如下，其他定义与AVERAGE方式相似，区别是存最大值与最小值
+    # 每隔5分钟(1*300秒)存一次数据的平均值,存600笔，即2.08天
+    # 每隔30分钟(6*300秒)存一次数据的平均值,存700笔，即14.58天（2周）
+    # 每隔2小时(24*300秒)存一次数据的平均值,存775笔，即64.58天（2个月）
+    # 每隔24小时(288*300秒)存一次数据的平均值,存797笔，即797天(2年)
+
+    rrd = rrdtool.create(rrd_name, '--step', '%s' % step, '--start', cur_time,
                          'DS:metric:%s:600:0:U' % counter_type,
                          'RRA:AVERAGE:0.5:1:600',
                          'RRA:AVERAGE:0.5:6:700',
@@ -37,7 +46,7 @@ def rrd_init(rrdname, step, counter_type):
                          )
 
     if rrd:
-        print(rrd)
+        print(rrd.error)
 
 
 def rrd_update(rrd_name, rx):
@@ -45,4 +54,4 @@ def rrd_update(rrd_name, rx):
     print(rrd_name, start_time, type(start_time), rx, type(rx))
     x = rrdtool.updatev(rrd_name, "%s:%s" % (str(start_time), str(rx)))
     if x:
-        print(x)
+        print(x.error)

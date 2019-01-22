@@ -46,7 +46,7 @@ def rrd_init(rrd_name, step, counter_type):
                          )
 
     if rrd:
-        print(rrd.error)
+        print(rrd.error())
 
 
 def rrd_update(rrd_name, rx):
@@ -54,4 +54,4 @@ def rrd_update(rrd_name, rx):
     print(rrd_name, start_time, type(start_time), rx, type(rx))
     x = rrdtool.updatev(rrd_name, "%s:%s" % (str(start_time), str(rx)))
     if x:
-        print(x.error)
+        print(x.error())

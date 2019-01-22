@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'transfer'
+    'transfer',
+    'django_rundirect'
 ]
 
 MIDDLEWARE = [
@@ -98,6 +99,34 @@ MONGODB_DATABASES = {
 
 from mongoengine import connect
 connect("test", host='39.106.220.85')
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': '127.0.0.1:6379',
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": "xzj123"
+        },
+    },
+}
+
+REDIS_TIMEOUT = 7*24*60*60
+CUBES_REDIS_TIMEOUT = 60*60
+NEVER_REDIS_TIMEOUT = 365*24*60*60
+
+
+#邮件配置
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = False                            # 与SMTP服务器通信时，是否启动TLS链接(安全链接)。默认是false
+EMAIL_HOST = 'smtp.163.com'                     # SMTP地址
+EMAIL_PORT = 25                                 # SMTP端口
+EMAIL_HOST_USER = '18811727193@163.com'         # 邮箱地址
+EMAIL_HOST_PASSWORD = 'xzjdxi19930420'          # 邮箱密码
+EMAIL_SUBJECT_PREFIX = u'[django]'               # 为邮件Subject-line前缀,默认是'[django]'
+#管理员站点
+SERVER_EMAIL = 'webmaster@163.com'              # The email address that error messages come from, such as those sent to ADMINS and MANAGERS.</span>
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators

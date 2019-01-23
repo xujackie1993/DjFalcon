@@ -13,9 +13,88 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import logging
+import logging.handlers
+import django.utils.log
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_LOG_DIR = os.path.join(BASE_DIR, "log")
+# 管理员邮箱
+ADMINS = (
+    ('xuzj', '844743779@163.com'),
+)
+
+# 非空链接，却发生404错误，发送通知MANAGERS
+SEND_BROKEN_LINK_EMAILS = True
+MANAGERS = ADMINS
+
+#邮件配置
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True                                    # 与SMTP服务器通信时，是否启动TLS链接(安全链接)。默认是false
+EMAIL_HOST = 'smtp.163.com'                             # SMTP地址
+EMAIL_PORT = 25                                         # SMTP端口
+EMAIL_HOST_USER = '18811727193@163.com'                 # 邮箱地址
+EMAIL_HOST_PASSWORD = 'xzj123'                          # 邮箱授权码
+EMAIL_SUBJECT_PREFIX = 'django'                         # 为邮件Subject-line前缀,默认是'[django]'
+DEFAULT_FROM_EMAIL = SERVER_EMAIL = EMAIL_HOST_USER     # 设置发件人
+
+# logging日志配置
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {  # 日志格式
+        'standard': {
+            'format': '%(asctime)s [%(threadName)s:%(thread)d] [%(name)s:%(lineno)d] [%(module)s:%(funcName)s] [%(levelname)s]- %(message)s'}
+    },
+    'filters': {  # 过滤器
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        }
+    },
+    'handlers': {  # 处理器
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
+        'mail_admins': {  # 发送邮件通知管理员
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'filters': ['require_debug_false'],  # 仅当 DEBUG = False 时才发送邮件
+            'include_html': True,
+        },
+        'debug': {  # 记录到日志文件(需要创建对应的目录，否则会出错)
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, "log", 'debug.log'),  # 日志输出文件
+            'maxBytes': 1024 * 1024 * 5,  # 文件大小
+            'backupCount': 5,  # 备份份数
+            'formatter': 'standard',  # 使用哪种formatters日志格式
+        },
+        'console': {  # 输出到控制台
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+        },
+    },
+    'loggers': {  # logging管理器
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
+        'django.request': {
+            'handlers': ['debug', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        # 对于不在 ALLOWED_HOSTS 中的请求不发送报错邮件
+        'django.security.DisallowedHost': {
+            'handlers': ['null'],
+            'propagate': False,
+        },
+    }
+}
 
 
 # Quick-start development settings - unsuitable for production
@@ -115,18 +194,6 @@ CACHES = {
 REDIS_TIMEOUT = 7*24*60*60
 CUBES_REDIS_TIMEOUT = 60*60
 NEVER_REDIS_TIMEOUT = 365*24*60*60
-
-
-#邮件配置
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS = False                            # 与SMTP服务器通信时，是否启动TLS链接(安全链接)。默认是false
-EMAIL_HOST = 'smtp.163.com'                     # SMTP地址
-EMAIL_PORT = 25                                 # SMTP端口
-EMAIL_HOST_USER = '18811727193@163.com'         # 邮箱地址
-EMAIL_HOST_PASSWORD = 'xzjdxi19930420'          # 邮箱密码
-EMAIL_SUBJECT_PREFIX = u'[django]'               # 为邮件Subject-line前缀,默认是'[django]'
-#管理员站点
-SERVER_EMAIL = 'webmaster@163.com'              # The email address that error messages come from, such as those sent to ADMINS and MANAGERS.</span>
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators

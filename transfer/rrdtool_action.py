@@ -2,17 +2,8 @@
 
 import os
 import time
-
 import rrdtool
-
-
-def rrd_init_or_update(rrd_name, value, step, counter_type, rrd_dir):
-    rrd_path = os.path.join(rrd_dir, rrd_name)
-    if os.path.isfile(rrd_path):
-        rrd_update(rrd_path, value)
-    else:
-        rrd_init(rrd_path, step, counter_type)
-        rrd_update(rrd_path, value)
+from django.conf import settings
 
 
 def rrd_init(rrd_name, step, counter_type):
@@ -55,3 +46,22 @@ def rrd_update(rrd_name, rx):
     x = rrdtool.updatev(rrd_name, "%s:%s" % (str(start_time), str(rx)))
     if x:
         print(x.error())
+
+
+def rrd_init_or_update(rrd_name, value, step, counter_type, rrd_dir):
+    rrd_path = os.path.join(rrd_dir, rrd_name)
+    if os.path.isfile(rrd_path):
+        rrd_update(rrd_path, value)
+    else:
+        rrd_init(rrd_path, step, counter_type)
+        rrd_update(rrd_path, value)
+
+
+def convert_data_rrd(host, items):
+    base_dir = os.path.join(settings.BASE_DIR, 'rrddatas')
+    rrd_dir = os.path.join(base_dir, host)
+    if not os.path.isdir(rrd_dir):
+        os.makedirs(rrd_dir)
+    for k, v in items.items():
+        rrd_name = k + '.rrd'
+        rrd_init_or_update(rrd_name, v['value'], v['step'], v['counterType'], rrd_dir)

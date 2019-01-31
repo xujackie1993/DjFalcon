@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
-from django.conf import settings
+import datetime
 from django.http import HttpResponse
 from django_redis import get_redis_connection
 from rest_framework.views import APIView
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
+from rest_framework.status import HTTP_200_OK
 from .models import Host, ServerRules
-from .rrdtool_action import rrd_init_or_update
+from .rrdtool_action import convert_data_rrd
+from utility.cache_util import get_inter_exter_mapping
 
 conn = get_redis_connection('default')
 
@@ -18,7 +18,7 @@ class HostReportView(APIView):
     def post(self, request):
         if request.method == "POST":
             data = request.data
-            print(data)
+            print(type(data))
             cdn = data.get("cdn", None)
             try:
                 server_rule = ServerRules.objects.get(Cdn=cdn)
@@ -38,7 +38,8 @@ class HostReportView(APIView):
                     external_ip = l_ips[1]
             if Host.objects.filter(InternalIp=internal_ip, MacAddress=mac_address):
                 Host.objects.update(Hostname=hostname, MacAddress=mac_address, InternalIp=internal_ip,
-                                    ExternalIp=external_ip, OsType=os_type, OsVersion=os_version, Cdn=server_rule)
+                                    ExternalIp=external_ip, OsType=os_type, OsVersion=os_version, Cdn=server_rule,
+                                    UpdateTime=datetime.datetime.now())
             else:
                 Host.objects.create(Hostname=hostname, MacAddress=mac_address, InternalIp=internal_ip,
                                     ExternalIp=external_ip, OsType=os_type, OsVersion=os_version, Cdn=server_rule)
@@ -50,14 +51,10 @@ class ItemCpuReportView(APIView):
 
     def post(self, request):
         data = request.data
-        hostname = data['host']['hostname']
-        base_dir = os.path.join(settings.BASE_DIR, 'rrddatas')
-        rrd_dir = os.path.join(base_dir, hostname)
-        if not os.path.isdir(rrd_dir):
-            os.makedirs(rrd_dir)
-        for k, v in data['items'].items():
-            rrd_name = k + '.rrd'
-            rrd_init_or_update(rrd_name, v['value'], v['step'], v['counterType'], rrd_dir)
+        internal_ip = data['host']
+        ip_mapping = get_inter_exter_mapping()
+        external_ip = ip_mapping.get(internal_ip, "unknown")
+        convert_data_rrd(external_ip, data["items"])
         return HttpResponse('insert success!!', HTTP_200_OK)
 
 
@@ -66,30 +63,10 @@ class ItemMemReportView(APIView):
 
     def post(self, request):
         data = request.data
-        hostname = data['host']['hostname']
-        base_dir = os.path.join(settings.BASE_DIR, 'rrddatas')
-        rrd_dir = os.path.join(base_dir, hostname)
-        if not os.path.isdir(rrd_dir):
-            os.makedirs(rrd_dir)
-        for k, v in data['items'].items():
-            rrd_name = k + '.rrd'
-            rrd_init_or_update(rrd_name, v['value'], v['step'], v['counterType'], rrd_dir)
-        return HttpResponse('insert success!!', HTTP_200_OK)
-
-
-class ItemDataReportView(APIView):
-    permission_classes = []
-
-    def post(self, request):
-        data = request.data
-        hostname = data['host']['hostname']
-        base_dir = os.path.join(settings.BASE_DIR, 'rrddatas')
-        rrd_dir = os.path.join(base_dir, hostname)
-        if not os.path.isdir(rrd_dir):
-            os.makedirs(rrd_dir)
-        for k, v in data['items'].items():
-            rrd_name = k + '.rrd'
-            rrd_init_or_update(rrd_name, v['value'], v['step'], v['counterType'], rrd_dir)
+        internal_ip = data['host']
+        ip_mapping = get_inter_exter_mapping()
+        external_ip = ip_mapping.get(internal_ip, "unknown")
+        convert_data_rrd(external_ip, data["items"])
         return HttpResponse('insert success!!', HTTP_200_OK)
 
 

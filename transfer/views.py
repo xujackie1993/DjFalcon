@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django_redis import get_redis_connection
 from rest_framework.views import APIView
 from rest_framework.status import HTTP_200_OK
-from .models import Host, ServerRules
+from .models import Host
 from .rrdtool_action import convert_data_rrd
 from utility.cache_util import get_inter_exter_mapping
 
@@ -18,12 +18,7 @@ class HostReportView(APIView):
     def post(self, request):
         if request.method == "POST":
             data = request.data
-            print(type(data))
             cdn = data.get("cdn", None)
-            try:
-                server_rule = ServerRules.objects.get(Cdn=cdn)
-            except Exception as e:
-                return HttpResponse("ServerRule object does not exist error: ", e)
             hostname = data.get("hostname", None)
             ip_address = data.get("ip_address", None)
             mac_address = data.get("mac_address", None)
@@ -38,11 +33,11 @@ class HostReportView(APIView):
                     external_ip = l_ips[1]
             if Host.objects.filter(InternalIp=internal_ip, MacAddress=mac_address):
                 Host.objects.update(Hostname=hostname, MacAddress=mac_address, InternalIp=internal_ip,
-                                    ExternalIp=external_ip, OsType=os_type, OsVersion=os_version, Cdn=server_rule,
+                                    ExternalIp=external_ip, OsType=os_type, OsVersion=os_version, Cdn=cdn,
                                     UpdateTime=datetime.datetime.now())
             else:
                 Host.objects.create(Hostname=hostname, MacAddress=mac_address, InternalIp=internal_ip,
-                                    ExternalIp=external_ip, OsType=os_type, OsVersion=os_version, Cdn=server_rule)
+                                    ExternalIp=external_ip, OsType=os_type, OsVersion=os_version, Cdn=cdn)
             return HttpResponse('add success! ', HTTP_200_OK)
 
 

@@ -120,8 +120,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'transfer',
     'celery_demo',
-    'django_rundirect'
+    'web',
+    'django_filters',
+    'django_rundirect',
+    'rest_framework'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'utility.RenderResponse.CustomJsonRenderer',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 2,
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -164,7 +175,7 @@ DATABASES = {
         'NAME': 'test-django',
         'USER': 'root',
         'PASSWORD': 'root',
-        'HOST': '127.0.0.1',
+        'HOST': '39.106.220.85',
         'PORT': '3306'
     }
 }
@@ -172,19 +183,19 @@ DATABASES = {
 MONGODB_DATABASES = {
     "default": {
         "name": "test",
-        "host": '127.0.0.1',
+        "host": '39.106.220.85',
         "tz_aware": True     # 设置时区
     },
 }
 
 from mongoengine import connect
-connect("test", host='127.0.0.1')
+connect("test", host='39.106.220.85')
 
 
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/0',
+        'LOCATION': 'redis://39.106.220.85:6379/0',
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "PASSWORD": "xzj123"
@@ -196,8 +207,8 @@ REDIS_TIMEOUT = 7*24*60*60
 CUBES_REDIS_TIMEOUT = 60*60
 NEVER_REDIS_TIMEOUT = 365*24*60*60
 
-BROKER_URL = 'redis://:xzj123@127.0.0.1:6379'
-CELERY_RESULT_BACKEND = 'redis://:xzj123@127.0.0.1:6379'
+BROKER_URL = 'redis://:xzj123@39.106.220.85:6379'
+CELERY_RESULT_BACKEND = 'redis://:xzj123@39.106.220.85:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

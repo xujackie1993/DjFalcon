@@ -2,7 +2,7 @@
 
 import os
 import time
-import rrdtool
+# import rrdtool
 from django.conf import settings
 
 
@@ -20,32 +20,32 @@ def rrd_init(rrd_name, step, counter_type):
     # 每隔2小时(24*300秒)存一次数据的平均值,存775笔，即64.58天（2个月）
     # 每隔24小时(288*300秒)存一次数据的平均值,存797笔，即797天(2年)
 
-    rrd = rrdtool.create(rrd_name, '--step', '%s' % step, '--start', cur_time,
-                         'DS:metric:%s:600:0:U' % counter_type,
-                         'RRA:AVERAGE:0.5:1:600',
-                         'RRA:AVERAGE:0.5:6:700',
-                         'RRA:AVERAGE:0.5:24:775',
-                         'RRA:AVERAGE:0.5:288:797',
-                         'RRA:MAX:0.5:1:600',
-                         'RRA:MAX:0.5:6:700',
-                         'RRA:MAX:0.5:24:775',
-                         'RRA:MAX:0.5:444:797',
-                         'RRA:MIN:0.5:1:600',
-                         'RRA:MIN:0.5:6:700',
-                         'RRA:MIN:0.5:24:775',
-                         'RRA:MIN:0.5:444:797',
-                         )
-
-    if rrd:
-        print(rrd.error())
+    # rrd = rrdtool.create(rrd_name, '--step', '%s' % step, '--start', cur_time,
+    #                      'DS:metric:%s:600:0:U' % counter_type,
+    #                      'RRA:AVERAGE:0.5:1:600',
+    #                      'RRA:AVERAGE:0.5:6:700',
+    #                      'RRA:AVERAGE:0.5:24:775',
+    #                      'RRA:AVERAGE:0.5:288:797',
+    #                      'RRA:MAX:0.5:1:600',
+    #                      'RRA:MAX:0.5:6:700',
+    #                      'RRA:MAX:0.5:24:775',
+    #                      'RRA:MAX:0.5:444:797',
+    #                      'RRA:MIN:0.5:1:600',
+    #                      'RRA:MIN:0.5:6:700',
+    #                      'RRA:MIN:0.5:24:775',
+    #                      'RRA:MIN:0.5:444:797',
+    #                      )
+    #
+    # if rrd:
+    #     print(rrd.error())
 
 
 def rrd_update(rrd_name, rx):
     start_time = int(time.time())
     print(rrd_name, start_time, type(start_time), rx, type(rx))
-    x = rrdtool.updatev(rrd_name, "%s:%s" % (str(start_time), str(rx)))
-    if x:
-        print(x.error())
+    # x = rrdtool.updatev(rrd_name, "%s:%s" % (str(start_time), str(rx)))
+    # if x:
+    #     print(x.error())
 
 
 def rrd_init_or_update(rrd_name, value, step, counter_type, rrd_dir):
